@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# This script will be executed *after* all the other init scripts.
+# You can put your own initialization stuff in here if you don't
+# want to do the full Sys V style init stuff.
+
+ulimit -SHn 65535
+ifenslave bond0 em1 em2
+
+touch /var/lock/subsys/local
+echo 16 > /sys/block/sdb/queue/read_ahead_kb
+echo 512 > /sys/block/sdb/queue/nr_requests

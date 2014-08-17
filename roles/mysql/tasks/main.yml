@@ -1,0 +1,40 @@
+---
+
+- name: install required packages
+  yum: 'name={{ item }} state=present'
+  with_items:
+    - gcc
+    - gcc-c++
+    - libstdc++-devel
+    - ncurses-devel
+    - e2fsprogs-devel
+    - krb5-devel
+    - libidn-devel
+    - openssl-devel
+    - ntp
+    - sysstat
+    - wget
+    - libaio
+    - libaio-devel
+
+- name: update rc.local
+  copy: 'src=rc.local dest=/etc/rc.d/rc.local mode=755'
+
+- name: update sysctl.conf
+  copy: 'src=sysctl.conf dest=/etc/sysctl.conf mode=644'
+
+- name: update ldconfig
+  copy: 'src=mysql.conf dest=/etc/ld.so.conf.d/mysql.conf mode=644'
+
+- name: create var serverid
+  shell: "ifconfig | grep 192.168.1 | awk '{print $2}' | awk -F. '{print $NF}'"
+  register: serverid
+
+- name: mysql config
+  template: 'src=my.cnf dest=/etc/my.cnf mode=644'
+
+- name: install mysql
+  script: 'mysql.sh'
+
+- name: ssh config
+  script: 'ssh.sh'

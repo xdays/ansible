@@ -1,0 +1,4 @@
+---
+
+- name: all in one
+  script: 'zabbix_mysql.sh {{ username }} {{ password }}'
