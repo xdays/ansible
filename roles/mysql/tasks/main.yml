@@ -27,7 +27,7 @@
   copy: 'src=mysql.conf dest=/etc/ld.so.conf.d/mysql.conf mode=644'
 
 - name: create var serverid
-  shell: "ifconfig | grep 192.168.1 | awk '{print $2}' | awk -F. '{print $NF}'"
+  shell: "ifconfig | grep 192.168 | awk '{print $2}' | awk -F. '{print $(NF-1)$NF}'"
   register: serverid
 
 - name: mysql config
