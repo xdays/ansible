@@ -1,0 +1,27 @@
+---
+- name: download etcd release
+  get_url: url="https://github.com/coreos/etcd/releases/download/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-amd64.tar.gz" dest=/tmp/etcd-{{ etcd_version }}-linux-amd64.tar.gz
+
+- name: extrack etcd binary
+  shell: cd /tmp/ && tar xzf etcd-{{ etcd_version }}-linux-amd64.tar.gz
+
+- name: copy etcd into /opt/everstring/etcd/bin/
+  shell: mkdir -p /opt/everstring/etcd/bin && cp -f /tmp/etcd-{{ etcd_version }}-linux-amd64/etcd* /opt/everstring/etcd/bin/
+
+- name: copy systemd unit file for etcd
+  template: src=etcd.service.j2 dest=/usr/lib/systemd/system/etcd.service
+
+- name: reload systemd daemon
+  shell: systemctl daemon-reload
+
+- name: enable etcd on master node
+  shell: systemctl enable etcd.service
+
+- name: start etcd on master node
+  shell: systemctl start etcd.service
+
+- name: clean up etcd
+  shell: rm -rf /tmp/etcd*
+
+- name: config flannel
+  shell: "/opt/everstring/etcd/bin/etcdctl set /coreos.com/network/config '{\"Network\": \"{{ cluster_network }}\"}'"

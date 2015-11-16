@@ -1,0 +1,42 @@
+---
+- include: flannel.yml
+
+- name: download kubernetes release
+  get_url: url="https://github.com/kubernetes/kubernetes/releases/download/{{ kubernetes_version }}/kubernetes.tar.gz" dest=/tmp/kubernetes.tar.gz
+
+- name: extract kubernetes binary
+  shell: cd /tmp/ && tar xzf kubernetes.tar.gz && cd kubernetes/server && tar xzf kubernetes-server-linux-amd64.tar.gz
+
+- name: copy kubernetes into /opt/everstring/kubernetes/bin/
+  shell: mkdir -p /opt/everstring/kubernetes/{bin,etc,ssl,manifests} && cp -f /tmp/kubernetes/server/kubernetes/server/bin/kubelet /opt/everstring/kubernetes/bin/
+
+- name: copy ssl certificate ca.pem required by kubernetes
+  copy: content="{{ lookup('vault', 'ca.pem') }}" dest=/opt/everstring/kubernetes/ssl/ca.pem
+
+- name: copy ssl certificate worker.pem required by kubernetes
+  copy: content="{{ lookup('vault', 'worker.pem') }}" dest=/opt/everstring/kubernetes/ssl/worker.pem
+
+- name: copy ssl certificate worker-key.pem required by kubernetes
+  copy: content="{{ lookup('vault', 'worker-key.pem') }}" dest=/opt/everstring/kubernetes/ssl/worker-key.pem
+
+- name: copy worker-kubeconfig
+  copy: src=worker-kubeconfig.yaml dest=/opt/everstring/kubernetes/etc/
+
+- name: copy kubelet systemd file
+  template: src=kubelet.service.j2 dest=/usr/lib/systemd/system/kubelet.service
+
+- name: copy manifest file
+  template: src={{ item }}.j2 dest=/opt/everstring/kubernetes/manifests/{{ item }}
+  with_items:
+    - kube-proxy.yaml
+
+- name: reload systemd daemon
+  shell: systemctl daemon-reload
+
+- name: clean up temp file
+  shell: rm -rf /tmp/kubernetes*
+
+- name: enable kubelet on agent node
+  shell: systemctl enable kubelet.service
+
+- include: docker.yml

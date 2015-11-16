@@ -1,9 +1,23 @@
-# 说明
-一些平时工作中用到的ansible模块和角色
+# Introduction
 
-# 组件
-* 两个模块，一个是docker_facts用于收集远程机器的docker信息，一个是upyun_facts用于收集远程/etc/upyun.cfg定义的变量
-* 两个角色，一个用于初始化mysql服务器，一个用于配置mysql的zabbix监控
+works based on Ansible
 
-# 其他
+
+# Components
+
+## modules
+
+* `docker_facts` : get facts of docker container
+
+## roles
+
+* `mysql` : setup mysql server
+* `zabbix_mysql` : setup zabbix monitoring for mysql server
+* `kubernetes` : setup kubernetes cluster
+
+## plugins
+
+* `callback_plugins` : store inventory in mysql
+* ` lookup_plugins` : decrypt files encrypted by ansible-vault
+
 Enjoy!

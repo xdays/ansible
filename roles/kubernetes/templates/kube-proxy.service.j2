@@ -1,0 +1,10 @@
+[Unit]
+Description=kube-proxy
+
+[Service]
+ExecStart=/opt/everstring/kubernetes/bin/kube-proxy --master=https://{{ cluster_hostname }} --kubeconfig=/opt/everstring/kubernetes/etc/worker-kubeconfig.yaml
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

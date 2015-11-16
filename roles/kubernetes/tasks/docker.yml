@@ -1,0 +1,24 @@
+---
+- name: update device-mapper
+  shell: yum update -y device-mapper-libs
+
+- name: install docker engine
+  shell: curl -s https://get.docker.com | sh
+
+- name: config docker engine
+  template: src=docker.service.j2 dest=/usr/lib/systemd/system/docker.service
+
+- name: reload systemd daemon
+  shell: systemctl daemon-reload
+
+- name: enable docker engine
+  shell: systemctl enable docker
+
+- name: update kernel to support overlay
+  shell: rpm -q elrepo-release || rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm && yum install --enablerepo=elrepo-kernel -y kernel-ml kernel-ml-{firmware,headers,devel} && grub2-set-default 0 && grub2-mkconfig -o /boot/grub2/grub.cfg
+
+- name: reboot system
+  shell: sleep 5 && reboot
+  async: 1
+  poll: 0
+  ignore_errors: yes

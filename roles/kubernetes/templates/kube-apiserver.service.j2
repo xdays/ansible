@@ -1,0 +1,13 @@
+[Unit]
+Description=kube-apiserver
+After=etcd.service
+Requires=etcd.service
+
+[Service]
+ExecStart=/opt/everstring/kubernetes/bin/kube-apiserver --bind-address=0.0.0.0 --secure_port=443 --etcd_servers=http://127.0.0.1:2379 --allow-privileged=true --service-cluster-ip-range=10.3.0.0/24 --tls-cert-file=/opt/everstring/kubernetes/ssl/apiserver.pem --tls-private-key-file=/opt/everstring/kubernetes/ssl/apiserver-key.pem --client-ca-file=/opt/everstring/kubernetes/ssl/ca.pem --service-account-key-file=/opt/everstring/kubernetes/ssl/apiserver-key.pem --cloud-provider=aws
+Restart=always
+RestartSec=10s
+Type=notify
+
+[Install]
+WantedBy=multi-user.target

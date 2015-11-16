@@ -1,0 +1,10 @@
+[Unit]
+Description=kube-controller-manager
+
+[Service]
+ExecStart=/opt/everstring/kubernetes/bin/kube-controller-manager --master=https://127.0.0.1  --kubeconfig=/opt/everstring/kubernetes/etc/worker-kubeconfig.yaml --root-ca-file=/opt/everstring/kubernetes/ssl/ca.pem --service-account-private-key-file=/opt/everstring/kubernetes/ssl/apiserver-key.pem --cloud-provider=aws
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

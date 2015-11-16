@@ -1,0 +1,12 @@
+[Unit]
+Description=kubelet
+Require=docker.service
+After=docker.service
+
+[Service]
+Restart=on-failure
+LimitNOFILE=65536
+ExecStart=/opt/everstring/kubernetes/bin/kubelet --api_servers=https://{{ cluster_hostname }} --kubeconfig=/opt/everstring/kubernetes/etc/worker-kubeconfig.yaml --register-node=true  --allow-privileged=true --tls-cert-file=/opt/everstring/kubernetes/ssl/worker.pem --tls-private-key-file=/opt/everstring/kubernetes/ssl/worker-key.pem --cloud-provider=aws --config=/opt/everstring/kubernetes/manifests --cluster-dns={{ cluster_dns }} --cluster-domain={{ cluster_domain }}
+
+[Install]
+WantedBy=multi-user.target

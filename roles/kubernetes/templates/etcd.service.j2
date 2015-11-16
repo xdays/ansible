@@ -1,0 +1,17 @@
+[Unit]
+Description=etcd
+
+[Service]
+Type=notify
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+Environment=ETCD_DATA_DIR=/opt/everstring/etcd/default.etcd
+Environment=ETCD_NAME=%m
+Environment=ETCD_ELECTION_TIMEOUT=1200
+Environment="ETCD_ADVERTISE_CLIENT_URLS=http://127.0.0.1:2379"
+Environment="ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379"
+ExecStart=/opt/everstring/etcd/bin/etcd
+
+[Install]
+WantedBy=multi-user.target

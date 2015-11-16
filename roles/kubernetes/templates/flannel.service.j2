@@ -1,0 +1,13 @@
+[Unit]
+Description=Network fabric for containers
+Documentation=https://github.com/coreos/flannel
+
+[Service]
+Type=notify
+Restart=always
+RestartSec=5
+LimitNOFILE=40000
+LimitNPROC=1048576
+EnvironmentFile=/opt/everstring/flannel/etc/option.env
+ExecStart=/opt/everstring/flannel/bin/flanneld
+ExecStartPost=/opt/everstring/flannel/bin/mk-docker-opts.sh

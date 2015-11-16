@@ -1,0 +1,10 @@
+[Unit]
+Description=kube-scheduler
+
+[Service]
+ExecStart=/opt/everstring/kubernetes/bin/kube-scheduler --master=https://127.0.0.1 --kubeconfig=/opt/everstring/kubernetes/etc/worker-kubeconfig.yaml
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

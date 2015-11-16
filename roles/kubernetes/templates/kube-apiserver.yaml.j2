@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - name: kube-apiserver
+    image: gcr.io/google_containers/hyperkube:v1.0.6
+    command:
+    - /hyperkube
+    - apiserver
+    - --bind-address=0.0.0.0
+    - --secure_port=443
+    - --etcd_servers=http://127.0.0.1:2379
+    - --allow-privileged=true
+    - --service-cluster-ip-range=10.3.0.0/24
+    - --admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+    - --tls-cert-file=/opt/everstring/kubernetes/ssl/apiserver.pem
+    - --tls-private-key-file=/opt/everstring/kubernetes/ssl/apiserver-key.pem
+    - --client-ca-file=/opt/everstring/kubernetes/ssl/ca.pem
+    - --service-account-key-file=/opt/everstring/kubernetes/ssl/apiserver-key.pem
+    - --cloud-provider=aws
+    ports:
+    - containerPort: 443
+      hostPort: 443
+      name: https
+    volumeMounts:
+    - mountPath: /opt/everstring/kubernetes
+      name: ssl-certs-kubernetes
+      readOnly: true
+    - mountPath: /etc/ssl
+      name: ssl-certs-host
+      readOnly: true
+    - mountPath: /etc/pki
+      name: pki-certs-host
+      readOnly: true
+  volumes:
+  - hostPath:
+      path: /opt/everstring/kubernetes
+    name: ssl-certs-kubernetes
+  - hostPath:
+      path: /etc/ssl
+    name: ssl-certs-host
+  - hostPath:
+      path: /etc/pki
+    name: pki-certs-host

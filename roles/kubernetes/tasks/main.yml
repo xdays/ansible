@@ -1,0 +1,9 @@
+---
+- include: etcd.yml
+  when: "'etcd' in group_names"
+
+- include: master.yml
+  when: "'master' in group_names"
+
+- include: agent.yml
+  when: "'agent' in group_names"

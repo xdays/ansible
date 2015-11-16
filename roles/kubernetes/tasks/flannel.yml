@@ -1,0 +1,27 @@
+---
+- name: download flannel release
+  get_url: url="https://github.com/coreos/flannel/releases/download/v{{ flannel_version }}/flannel-{{ flannel_version }}-linux-amd64.tar.gz" dest=/tmp/flannel-{{ flannel_version }}-linux-amd64.tar.gz
+
+- name: extrack flannel binary
+  shell: cd /tmp/ && tar xzf flannel-{{ flannel_version }}-linux-amd64.tar.gz
+
+- name: flannel into /opt/everstring/flannel/bin
+  shell: mkdir -p /opt/everstring/flannel/{bin,etc} && cp -f /tmp/flannel-{{ flannel_version }}/{flanneld,mk-docker-opts.sh} /opt/everstring/flannel/bin
+
+- name: copy systemd unit file for flannel
+  template: src=flannel.service.j2 dest=/usr/lib/systemd/system/flannel.service
+
+- name: config flannel
+  template: src=flannel.env.j2 dest=/opt/everstring/flannel/etc/option.env
+
+- name: reload systemd daemon
+  shell: systemctl daemon-reload
+
+- name: enable flannel on node
+  shell: systemctl enable flannel.service
+
+- name: start flannel on node
+  shell: systemctl start flannel.service
+
+- name: clean up flannel
+  shell: rm -rf /tmp/flannel*

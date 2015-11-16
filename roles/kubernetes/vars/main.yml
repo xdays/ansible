@@ -1,0 +1,9 @@
+---
+cluster_network: 10.0.0.0/16
+service_network: 10.3.0.0/24
+cluster_dns: 10.3.0.2
+cluster_domain: everstring.com
+cluster_hostname: c.everstring.com 
+etcd_version: v2.2.1
+flannel_version: 0.5.4
+kubernetes_version:  v1.0.6
