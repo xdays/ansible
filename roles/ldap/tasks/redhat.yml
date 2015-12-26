@@ -1,0 +1,40 @@
+---
+- name: install sssd
+  yum: name={{ item }} state=latest
+  with_items:
+    - sssd
+    - libsss_sudo
+
+- name: update pam to create home dir
+  shell: authconfig --enablemkhomedir --update
+
+- name: update nsswitch.conf
+  copy: src=nsswitch.conf dest=/etc/nsswitch.conf backup=yes
+
+- name: update pam to auth by ldap
+  copy: src=system-auth dest=/etc/pam.d/system-auth backup=yes
+
+- name: generate sssd.conf
+  template: src=sssd.conf.j2 dest=/etc/sssd/sssd.conf mode=600
+
+- name: update sshd_config
+  shell: grep ^AuthorizedKeysCommand /etc/ssh/sshd_config || echo -e "\nAuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys" >> /etc/ssh/sshd_config
+  when: "{{ ansible_distribution_major_version }} == 6"
+
+- name: update sshd_config
+  shell: grep ^AuthorizedKeysCommand /etc/ssh/sshd_config || echo -e "\nAuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys\nAuthorizedKeysCommandUser root" >> /etc/ssh/sshd_config
+  when: "{{ ansible_distribution_major_version}} == 7"
+
+- name: restart sssd service
+  service: name=sssd state=restarted
+
+- name: restart sshd service
+  service: name=sshd state=restarted
+
+- name: start sssd on boot
+  shell: chkconfig sssd on
+  when: "{{ ansible_distribution_major_version }} == 6"
+
+- name: start sssd on boot
+  shell: systemctl enable sssd
+  when: "{{ ansible_distribution_major_version }} == 7"

@@ -1,0 +1,5 @@
+---
+ldap_uri: ldaps://dir.example.com
+ldap_base: dc=example,dc=com
+ldap_sudo_base: ou=sudoers,dc=example,dc=com
+allow_groups_filter: (|(memberOf=cn=login,ou=group,dc=example,dc=com)(memberOf=cn=ops,ou=group,dc=example,dc=com))

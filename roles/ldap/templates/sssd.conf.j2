@@ -1,0 +1,30 @@
+[sssd]
+config_file_version = 2
+services = nss, pam, ssh, sudo
+domains = everstring
+debug_level = 3
+
+[nss]
+filter_users = root,ldap,named,avahi,haldaemon,dbus,radiusd,news,nscd
+
+[domain/everstring]
+ldap_id_use_start_tls = True
+ldap_tls_reqcert = never
+cache_credentials = True
+ldap_schema = rfc2307
+
+id_provider = ldap
+auth_provider = ldap
+chpass_provider = ldap
+ldap_uri = {{ ldap_uri }}
+ldap_search_base = {{ ldap_base }}
+
+ldap_user_ssh_public_key = sshPublicKey
+
+sudo_provider = ldap
+ldap_sudo_search_base = {{ ldap_sudo_base }}
+
+{% if ansible_os_family == "RedHat" %}
+access_provider = ldap
+ldap_access_filter = {{ allow_groups_filter }}
+{% endif %}

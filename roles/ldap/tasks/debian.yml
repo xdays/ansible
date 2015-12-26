@@ -1,0 +1,18 @@
+---
+- name: install sssd
+  apt: name=sssd state=latest
+
+- name: update pam to create home dir
+  shell: grep pam_mkhomedir /etc/pam.d/common-session || echo "\nsession required        pam_mkhomedir.so umask=0022 skel=/etc/skel" >> /etc/pam.d/common-session
+
+- name: generate sssd.conf
+  template: src=sssd.conf.j2 dest=/etc/sssd/sssd.conf mode=600
+
+- name: update sshd_config
+  shell: grep ^AuthorizedKeysCommand /etc/ssh/sshd_config || echo "\nAuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys\nAuthorizedKeysCommandUser root" >> /etc/ssh/sshd_config
+
+- name: restart sssd service
+  service: name=sssd state=restarted
+
+- name: restart sshd service
+  shell: service ssh restart
