@@ -1,0 +1,4 @@
+---
+- hosts: "{{ target }}"
+  roles:
+    - dev-sec.os-hardening
