@@ -1,0 +1,14 @@
+namespace: ethbyte
+name: ansible
+version: 1.0.0
+readme: README.md
+authors:
+  - xdays
+description: all my ansible work
+  - MIT
+tags: [kubernetes, zabbix, mysql]
+dependencies: {}
+repository: https://github.com/ethbyte/ansible
+documentation: https://xdays.me
+homepage: https://ehtbyte.com
+issues: https://github.com/ehtbyte/ansible/issues

@@ -32,11 +32,11 @@ get infomation of container named example
   tasks:
   docker_facts: filter=container name=example
 '''
- 
+
 HAS_DOCKER_PY = True
 
-from urlparse import urlparse
 import re
+from urllib.parse import urlparse
 try:
     import docker.client
     import docker.utils
@@ -44,17 +44,17 @@ try:
     try:
         from docker.errors import APIError as DockerAPIError
     except ImportError:
-        from docker.client import APIError as DockerAPIError 
-except ImportError, e:
+        from docker.client import APIError as DockerAPIError
+except ImportError as e:
     HAS_DOCKER_PY = False
+
 
 class DockerFacter:
     def __init__(self, module):
         self.module = module
         self.name = self.module.params.get('name')
-        # connect to docker server
         self.docker_url = urlparse(self.module.params.get('docker_url'))
-        self.client = docker.Client(base_url=self.docker_url.geturl())
+        self.client = docker.DockerClient(base_url=self.docker_url.geturl())
 
     def info(self):
         return self.client.info()
@@ -63,50 +63,48 @@ class DockerFacter:
         return self.client.version()
 
     def image_list(self):
-        results = self.client.images()
+        results = self.client.images.list()
         if self.name:
-            return [ i for i in results
-                if re.match(r'%s'%self.name, i['RepoTags'][0], flags=re.IGNORECASE)]
+            return [
+                i for i in results if re.match(
+                    r'%s' % self.name, i.tags[0], flags=re.IGNORECASE)
+            ]
         else:
-            return results
+            return [ i.tags[0] for i in results ]
 
-    def image_id(self):
-        image = self.image_list()
+    def image_info(self):
+        if not self.name:
+            raise Exception('image name is required')
+
+        image = self.client.images.get(self.name)
         if image:
-            return image[0]['Id']
+            i_info = image.attrs
+            return i_info
         else:
             raise Exception('image not found')
 
-    def image_inspect(self):
-        return self.client.inspect_image(self.image_id())
-
-    def image_history(self):
-        return self.client.history(self.name)
-
     def container_list(self):
-        results = self.client.containers()
+        results = self.client.containers.list()
         if self.name:
-            return [ i for i in results
-                if re.match(r'%s'%self.name,
-                    i['Names'][0].lstrip('/'), flags=re.IGNORECASE)]
+            return [
+                i for i in results if re.match(r'%s' % self.name,
+                                               i.name,
+                                               flags=re.IGNORECASE)
+            ]
         else:
-            return results
+            return [ i.name for i in results ]
 
-    def container_id(self):
-        container = self.container_list()
+    def container_info(self):
+        if not self.name:
+            raise Exception('container name or id is required')
+
+        container = self.container.get(self.name)
         if container:
-            return container[0]['Id']
+            c_info = container.attrs
+            c_info['Stats'] = container.stats()
+            return c_info
         else:
             raise Exception('container not found')
-
-    def container_inspect(self):
-        return self.client.inspect_container(self.container_id())
-
-    def container_top(self):
-        return self.client.top(self.container_id())
-
-    def container_logs(self):
-        return self.client.logs(self.container_id())
 
     def all_type(self):
         return {
@@ -116,14 +114,13 @@ class DockerFacter:
             'version': self.version()
         }
 
+
 def main():
-    module = AnsibleModule(
-        argument_spec = dict(
-            docker_url = dict(default='unix://var/run/docker.sock'),
-            filter = dict(default=all), 
-            name = dict(default=None),
-        )
-    )
+    module = AnsibleModule(argument_spec=dict(
+        docker_url=dict(default='unix://var/run/docker.sock'),
+        filter=dict(default="all"),
+        name=dict(default=None),
+    ))
 
     try:
         facter = DockerFacter(module)
@@ -136,16 +133,10 @@ def main():
             facts = facter.image_list()
         elif filter == 'image':
             facts = facter.image_inspect()
-        elif filter == 'history':
-            facts = facter.image_history()
         elif filter == 'containers':
             facts = facter.container_list()
         elif filter == 'container':
-            facts = facter.container_inspect()
-        elif filter == 'top':
-            facts = facter.container_top()
-        elif filter == 'logs':
-            facts = facter.container_logs()
+            facts = facter.container_info()
         elif filter == 'info':
             facts = facter.info()
         elif filter == 'version':
@@ -154,8 +145,9 @@ def main():
             facts = facter.all_type()
         module.exit_json(changed=False, docker_facts=facts)
 
-    except Exception, e:
+    except Exception as e:
         module.fail_json(changed=False, msg=repr(e))
+
 
 # import module snippets
 from ansible.module_utils.basic import *

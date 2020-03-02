@@ -1,6 +1,6 @@
 # Introduction
 
-works based on Ansible
+my ansible work oraginzed by ansible collection
 
 
 # Components
@@ -17,7 +17,7 @@ works based on Ansible
 
 ## plugins
 
-* `callback_plugins` : store inventory in mysql
-* ` lookup_plugins` : decrypt files encrypted by ansible-vault
+* `callback` : store inventory in mysql
+* ` lookup` : decrypt files encrypted by ansible-vault
 
 Enjoy!
