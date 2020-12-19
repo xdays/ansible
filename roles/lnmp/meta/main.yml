@@ -1,0 +1,14 @@
+galaxy_info:
+  author: xdays
+  description: install lnmp stack
+  company: ethbyte
+  license: MIT
+
+  min_ansible_version: 2.9
+
+  platforms:
+  - name: Ubuntu
+    versions:
+    - 18.04
+
+  galaxy_tags: [nginx, php, mysql]

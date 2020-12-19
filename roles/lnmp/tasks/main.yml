@@ -1,0 +1,39 @@
+---
+# tasks file for lnmp
+
+- name: install base tools
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+  with_items:
+    - curl
+
+- name: install nginx
+  apt:
+    name: nginx
+
+- name: create site dir
+  file:
+    path: /www
+    owner: www-data
+    group: www-data
+    state: directory
+
+- name: render server config
+  template:
+    src: site.conf.j2
+    dest: "/etc/nginx/conf.d/{{ item }}.conf"
+  vars:
+    server_name: "{{ item }}"
+  with_items: "{{ server_names }}"
+
+- name: install php packages
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - php7.2-fpm
+    - php7.2-mysql
+
+- name: install mariadb
+  apt:
+    name: mariadb-server
